@@ -1,0 +1,109 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Learning WebGL — lesson 1</title>
+
+<script type="text/javascript">
+    var triangleVertexPositionBuffer;
+    var squareVertexPositionBuffer;
+
+	var FSHADER_SOURCE =
+		'precision mediump float;' +
+		'void main(void) {\n' +
+		'	gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);\n' +
+		'}\n';
+
+	
+	var VSHADER_SOURCE =
+		'attribute vec4 a_Position;\n' +
+		'void main() {\n' +
+		' gl_Position = a_Position;\n' +
+		' gl_PointSize = 10.0;\n' +
+		'}\n';
+		
+    function webGLStart() {
+
+		//STEP #1
+        var canvas = document.getElementById("lesson01-canvas");
+        //initGL(canvas);
+		try {
+            gl = canvas.getContext("experimental-webgl");
+            gl.viewportWidth = canvas.width;
+            gl.viewportHeight = canvas.height;
+        } catch (e) {
+        }
+        if (!gl) {
+            alert("Could not initialise WebGL, sorry :-(");
+        }
+
+		
+		//STEP #2 Initialize shaders
+		//2.1 FRAGMENT
+		var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+		gl.shaderSource(fragmentShader, FSHADER_SOURCE);
+        gl.compileShader(fragmentShader);
+		gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)
+		
+		//2.2 VERTEX
+		var vertexShader = gl.createShader(gl.VERTEX_SHADER);
+		gl.shaderSource(vertexShader, VSHADER_SOURCE);
+        gl.compileShader(vertexShader);
+		gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)
+		
+		//2.3 Program
+        shaderProgram = gl.createProgram();
+        gl.attachShader(shaderProgram, vertexShader);
+        gl.attachShader(shaderProgram, fragmentShader);
+        gl.linkProgram(shaderProgram);
+        if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+            alert("Could not initialise shaders");
+        }
+        gl.useProgram(shaderProgram);
+		
+		///2.4
+        //shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+        //gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+        //shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
+        //shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
+		
+
+		//STEP #3 initVertexBuffers INIT BUFFER
+		triangleVertexPositionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
+        var vertices = [
+            -0.5, -0.5,
+			 0.5,  0.5,
+			 0.5, -0.5,
+			-0.5, -0.5
+        ];
+
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+        triangleVertexPositionBuffer.itemSize = 2;
+        triangleVertexPositionBuffer.numItems = 4;
+		
+		var a_Position = gl.getAttribLocation(shaderProgram, 'a_Position'); //gl.program
+		if (a_Position < 0) {
+			console.log('Failed to get the storage location of a_Position');
+			return -1;
+		}
+		gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0); // Assign the buffer object to a_Position variable
+		gl.enableVertexAttribArray(a_Position); // Enable the assignment to a_Position variable
+
+		
+		//STEP #4
+        gl.clearColor(0.0, 0.0, 0.0, 1.0);
+        gl.enable(gl.DEPTH_TEST);
+
+		gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+		gl.drawArrays(gl.LINE_STRIP, 0, triangleVertexPositionBuffer.numItems); //POINTS // TRIANGLE_STRIP // LINE_STRIP
+    }
+</script>
+</head>
+<body onload="webGLStart();">
+    <a href="#"><< Back to Lesson 1</a><br>
+    <canvas id="lesson01-canvas" style="border: none;" width="500" height="500"></canvas>
+    <br>
+    <a href="#"><< Back to Lesson 1</a><br>
+</body>
+</html>
