@@ -119,6 +119,7 @@ function initTextures(gl, n) {
   // Register the event handler to be called on loading an image
   image.onload = function(){ loadTexture(gl, n, texture, u_Sampler, image); };
   // Tell the browser to load an image
+  image.setAttribute('crossOrigin', 'anonymous');
   image.src = 'http://i44.tinypic.com/2z5jbtg.png';
 
   return true;
